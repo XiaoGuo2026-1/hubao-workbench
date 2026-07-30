@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#dcecfb">
+<title>虎宝的工作台</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<style>
+/* ============ 虎宝的工作台 · ins蓝粉紫柔和风 ============ */
+:root{
+  --blue:#aecff5; --blue-l:#e3effc; --blue-d:#6f9fd8;
+  --pink:#f6c9d8; --pink-l:#fdeef4; --pink-d:#e295b4;
+  --purple:#cfc3ef; --purple-l:#f0ebfb; --purple-d:#9c86d8;
+  --mint:#c6e8dd; --mint-l:#eafaf4;
+  --cream:#fff9ee; --yellow:#f9e1a8;
+  --text:#5a5670; --text-light:#9a94b3;
+  --bg:#f6f6fc; --card:#ffffff;
+  --radius:22px; --radius-s:14px;
+  --shadow:0 6px 20px rgba(150,140,200,.13);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:15px}
+body{
+  font-family:"PingFang SC","HarmonyOS Sans","Microsoft YaHei",sans-serif;
+  background:linear-gradient(160deg,#eef4fd 0%,#fdf1f6 55%,#f1edfb 100%);
+  min-height:100vh;color:var(--text);
+}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+input{font-family:inherit;outline:none}
+
+/* ---------- 顶部栏 ---------- */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:56px;z-index:50;
+  display:flex;align-items:center;gap:10px;padding:0 14px;
+  background:rgba(255,255,255,.75);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(175,160,220,.15);
+}
+.menu-btn{
+  width:40px;height:40px;border-radius:14px;font-size:20px;
+  background:linear-gradient(135deg,var(--blue-l),var(--purple-l));
+  color:var(--purple-d);box-shadow:0 2px 8px rgba(150,140,200,.15);
+}
+.topbar-title{display:flex;align-items:center;gap:6px;font-weight:700;font-size:17px;color:#7a6fb0}
+.logo-emoji{font-size:22px}
+.topbar-date{margin-left:auto;font-size:12px;color:var(--text-light);text-align:right;line-height:1.3}
+
+/* ---------- 侧边栏 ---------- */
+.mask{position:fixed;inset:0;background:rgba(90,80,130,.28);z-index:60;opacity:0;pointer-events:none;transition:.25s}
+.mask.show{opacity:1;pointer-events:auto}
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:236px;z-index:70;
+  background:linear-gradient(180deg,#fdfcff 0%,#f3f0fc 100%);
+  border-radius:0 28px 28px 0;box-shadow:8px 0 30px rgba(120,100,180,.12);
+  transform:translateX(-105%);transition:transform .28s cubic-bezier(.4,.9,.4,1);
+  display:flex;flex-direction:column;padding:20px 14px;
+}
+.sidebar.open{transform:translateX(0)}
+.side-head{display:flex;align-items:center;gap:10px;padding:6px 8px 18px;border-bottom:2px dashed #e5def5;margin-bottom:14px}
+.side-avatar{
+  width:52px;height:52px;border-radius:18px;font-size:28px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--yellow),var(--pink));
+  box-shadow:var(--shadow);
+}
+.side-name{font-weight:700;font-size:15px;color:#6d63a8}
+.side-date{font-size:11px;color:var(--text-light);margin-top:3px}
+.side-nav{display:flex;flex-direction:column;gap:8px;flex:1}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:11px 12px;
+  border-radius:18px;font-size:15px;font-weight:600;color:#8a83a8;
+  transition:.2s;text-align:left;
+}
+.nav-item .nav-text{flex:1}
+.nav-item.active{
+  background:linear-gradient(135deg,var(--blue-l),var(--pink-l));
+  color:#6d63a8;box-shadow:0 3px 12px rgba(150,140,200,.18);
+  transform:translateX(4px);
+}
+.nav-badge{font-size:10px;background:var(--pink);color:#fff;border-radius:20px;padding:2px 7px;min-width:20px;text-align:center}
+.nav-badge:empty{display:none}
+.side-foot{font-size:12px;color:var(--text-light);text-align:center;padding-top:12px}
+
+/* 赛罗奥特曼小图标（SVG容器） */
+.zero-icon{width:34px;height:34px;display:inline-flex;flex-shrink:0}
+.zero-icon svg{width:100%;height:100%}
+
+/* ---------- 主体 ---------- */
+.main{padding:70px 14px 30px;max-width:560px;margin:0 auto}
+.page{display:none;animation:fadeUp .3s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* 页面头部卡片 */
+.page-hero{
+  border-radius:var(--radius);padding:18px 18px 16px;margin-bottom:14px;
+  box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.hero-blue{background:linear-gradient(135deg,#dcecfb,#eef6ff)}
+.hero-pink{background:linear-gradient(135deg,#fbdfe9,#fdf1f6)}
+.hero-purple{background:linear-gradient(135deg,#e4dcf7,#f3eefc)}
+.hero-mint{background:linear-gradient(135deg,#d5f0e5,#eefaf5)}
+.hero-yellow{background:linear-gradient(135deg,#fbeccc,#fdf7ea)}
+.page-hero h2{font-size:19px;color:#6d63a8;display:flex;align-items:center;gap:8px}
+.page-hero .hero-sub{font-size:12px;color:var(--text-light);margin-top:6px}
+.hero-deco{position:absolute;right:12px;top:10px;font-size:38px;opacity:.5}
+
+/* 进度条 */
+.progress-wrap{margin-top:12px}
+.progress-label{font-size:12px;color:#8a83a8;margin-bottom:6px;font-weight:600}
+.progress-bar{height:12px;border-radius:10px;background:rgba(255,255,255,.7);overflow:hidden}
+.progress-fill{
+  height:100%;border-radius:10px;width:0;transition:width .4s ease;
+  background:linear-gradient(90deg,var(--blue),var(--purple),var(--pink));
+}
+
+/* 通用卡片 */
+.card{
+  background:var(--card);border-radius:var(--radius);padding:16px;
+  margin-bottom:14px;box-shadow:var(--shadow);
+}
+.card-title{
+  font-size:15px;font-weight:700;color:#6d63a8;
+  display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;
+}
+.card-title .t-emoji{font-size:20px}
+.card-title .t-time{font-size:11px;font-weight:600;color:#fff;background:var(--blue);border-radius:20px;padding:2px 9px}
+.card-body{font-size:14px;line-height:1.9;color:var(--text)}
+
+/* 喇叭按钮 */
+.spk{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:50%;font-size:15px;vertical-align:middle;
+  background:linear-gradient(135deg,var(--pink-l),var(--purple-l));
+  box-shadow:0 2px 6px rgba(150,140,200,.2);margin-left:6px;transition:.15s;
+}
+.spk:active{transform:scale(.85)}
+.spk.playing{background:linear-gradient(135deg,var(--pink),var(--purple));animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.12)}}
+
+/* 跳转链接按钮 */
+.link-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.link-btn{
+  font-size:12px;padding:6px 12px;border-radius:20px;font-weight:600;
+  display:inline-flex;align-items:center;gap:4px;text-decoration:none;
+}
+.link-bili{background:#e3effc;color:#4a86c8}
+.link-douyin{background:#fdeef4;color:#d8749c}
+.link-web{background:#f0ebfb;color:#8d76cc}
+
+/* ---------- 任务清单 ---------- */
+.task-add{display:flex;gap:8px;margin-bottom:12px}
+.task-add input{
+  flex:1;border:2px solid #ece7f8;border-radius:16px;padding:10px 14px;
+  font-size:14px;background:#fbfaff;color:var(--text);
+}
+.task-add input::placeholder{color:#c3bdd8}
+.task-add button{
+  padding:0 18px;border-radius:16px;font-size:14px;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,var(--blue-d),var(--purple-d));
+  box-shadow:0 3px 10px rgba(140,120,210,.3);
+}
+.task-list{display:flex;flex-direction:column;gap:9px}
+.task-item{
+  display:flex;align-items:center;gap:10px;padding:11px 12px;
+  background:#fbfaff;border:1.5px solid #efeaf9;border-radius:16px;transition:.2s;
+}
+.task-item.done{background:#f4f3f7;opacity:.65}
+.task-item.done .task-text{text-decoration:line-through;color:#b4aec9}
+.task-check{
+  width:24px;height:24px;border-radius:9px;border:2px solid var(--purple);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  color:#fff;flex-shrink:0;transition:.15s;background:#fff;
+}
+.task-item.done .task-check{background:linear-gradient(135deg,var(--purple),var(--pink));border-color:transparent}
+.task-text{flex:1;font-size:14px;line-height:1.4}
+.task-tag{font-size:10px;padding:2px 8px;border-radius:12px;font-weight:700;flex-shrink:0}
+.tag-chinese{background:var(--pink-l);color:var(--pink-d)}
+.tag-math{background:var(--blue-l);color:var(--blue-d)}
+.tag-english{background:var(--purple-l);color:var(--purple-d)}
+.tag-games{background:var(--mint-l);color:#5cab8d}
+.tag-plan{background:var(--cream);color:#cfa146}
+.task-pri{font-size:16px;flex-shrink:0;opacity:.35;transition:.15s}
+.task-pri.on{opacity:1}
+.task-del{font-size:15px;color:#d9d3ea;flex-shrink:0;padding:3px}
+.task-del:active{color:var(--pink-d)}
+.empty-tip{text-align:center;font-size:13px;color:var(--text-light);padding:16px}
+
+/* ---------- 内容展示 ---------- */
+.poem-box{text-align:center;padding:8px 0}
+.poem-title{font-size:18px;font-weight:700;color:#6d63a8}
+.poem-author{font-size:12px;color:var(--text-light);margin:4px 0 10px}
+.poem-line{font-size:16px;line-height:2.1;letter-spacing:2px}
+
+.hanzi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.hanzi-cell{
+  background:linear-gradient(135deg,#fbfaff,#f3f0fc);border-radius:14px;
+  padding:9px 2px;text-align:center;border:1.5px solid #eee8fa;
+}
+.hanzi-py{font-size:11px;color:var(--purple-d)}
+.hanzi-ch{font-size:24px;font-weight:700;color:#5a5670;line-height:1.3}
+
+.pinyin-row{display:flex;flex-wrap:wrap;gap:8px}
+.pinyin-chip{
+  background:linear-gradient(135deg,var(--pink-l),var(--purple-l));
+  border-radius:16px;padding:8px 14px;font-size:14px;font-weight:700;color:#8d76cc;
+  display:flex;align-items:center;gap:4px;
+}
+.spell-line{background:#fbfaff;border-radius:14px;padding:9px 14px;margin-top:8px;font-size:15px;font-weight:600;color:#6d63a8;display:flex;align-items:center;justify-content:space-between}
+
+.quiz-box{background:#fbfaff;border-radius:16px;padding:14px;margin-top:10px}
+.quiz-q{font-size:15px;font-weight:700;margin-bottom:10px;color:#6d63a8}
+.quiz-q .big{font-size:30px;margin:0 6px}
+.quiz-opts{display:flex;gap:10px;flex-wrap:wrap}
+.quiz-opt{
+  min-width:64px;padding:10px 16px;border-radius:16px;font-size:16px;font-weight:700;
+  background:#fff;border:2px solid #e8e2f7;color:var(--text);transition:.15s;
+}
+.quiz-opt.right{background:var(--mint);border-color:#7cc9aa;color:#2c7d5c}
+.quiz-opt.wrong{background:var(--pink-l);border-color:var(--pink-d);color:var(--pink-d)}
+.quiz-feedback{font-size:13px;margin-top:8px;font-weight:600;min-height:18px}
+
+.word-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.word-card{
+  background:linear-gradient(160deg,#fbfaff,#f0f4fd);border-radius:16px;
+  padding:10px 4px;text-align:center;border:1.5px solid #e8eefb;
+}
+.word-emoji{font-size:30px}
+.word-en{font-size:14px;font-weight:700;color:#4a86c8;margin-top:2px}
+.word-zh{font-size:11px;color:var(--text-light)}
+.word-card .spk{width:26px;height:26px;font-size:12px;margin:4px 0 0}
+
+.sent-item{background:#fbfaff;border-radius:14px;padding:10px 14px;margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sent-en{font-size:15px;font-weight:700;color:#6d63a8}
+.sent-zh{font-size:12px;color:var(--text-light);margin-top:2px}
+
+.num-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.num-ball{
+  width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:800;color:#fff;box-shadow:0 3px 8px rgba(150,140,200,.25);
+}
+.story-text{font-size:14.5px;line-height:2;background:#fbfaff;border-radius:16px;padding:14px;text-indent:2em}
+
+/* ---------- 游戏 ---------- */
+.game-tabs{display:flex;gap:10px;margin-bottom:14px}
+.game-tab{
+  flex:1;padding:12px;border-radius:18px;font-size:14px;font-weight:700;
+  background:#fff;color:#8a83a8;box-shadow:var(--shadow);transition:.2s;
+}
+.game-tab.active{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff}
+.match-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.match-card{
+  aspect-ratio:1;border-radius:18px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--blue-l),var(--purple-l));
+  color:transparent;box-shadow:var(--shadow);transition:.25s;border:2px solid transparent;
+}
+.match-card.flip{background:#fff;color:#6d63a8;border-color:var(--purple)}
+.match-card.matched{background:var(--mint-l);color:#5cab8d;border-color:var(--mint);opacity:.7;transform:scale(.93)}
+.game-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:13px;font-weight:700;color:#6d63a8}
+.goose-area{
+  position:relative;height:330px;border-radius:20px;overflow:hidden;
+  background:linear-gradient(180deg,#dff0fd 0%,#eafaf4 100%);
+  border:2px solid #d8e8f8;
+}
+.goose{
+  position:absolute;display:flex;flex-direction:column;align-items:center;
+  transition:top .1s linear;cursor:pointer;user-select:none;
+}
+.goose .g-body{font-size:34px;animation:waddle 1s infinite}
+.goose .g-item{
+  font-size:22px;background:#fff;border-radius:50%;width:38px;height:38px;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.12);
+  margin-top:-6px;
+}
+@keyframes waddle{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+.goose-target{
+  text-align:center;font-size:16px;font-weight:800;color:#4a86c8;
+  padding:10px;background:#fff;border-radius:16px;margin-bottom:10px;
+  display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--shadow);
+}
+.btn{
+  padding:11px 26px;border-radius:20px;font-size:15px;font-weight:700;transition:.15s;
+}
+.btn:active{transform:scale(.95)}
+.btn-primary{background:linear-gradient(135deg,var(--blue-d),var(--purple-d));color:#fff;box-shadow:0 4px 14px rgba(140,120,210,.35)}
+.btn-pink{background:linear-gradient(135deg,var(--pink-d),var(--purple-d));color:#fff;box-shadow:0 4px 14px rgba(220,130,170,.35)}
+.btn-ghost{background:#fff;color:#8d76cc;border:2px solid #e5def5}
+.center{text-align:center}
+
+/* ---------- 打卡 ---------- */
+.checkin-hero{text-align:center;padding:24px 16px}
+.checkin-big{font-size:56px;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.checkin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat-box{background:#fff;border-radius:18px;padding:14px 6px;text-align:center;box-shadow:var(--shadow)}
+.stat-num{font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--blue-d),var(--pink-d));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat-label{font-size:11px;color:var(--text-light);margin-top:4px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.cal-head{font-size:11px;color:var(--text-light);text-align:center;font-weight:700}
+.cal-day{
+  aspect-ratio:1;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;background:#fbfaff;border:1px solid #f0ecfa;color:var(--text-light);
+}
+.cal-day.stamped{background:linear-gradient(135deg,var(--pink-l),var(--purple-l));color:var(--purple-d);font-weight:800}
+.cal-day.today{border:2px solid var(--blue-d);font-weight:800;color:var(--blue-d)}
+.cal-day.empty{background:transparent;border:none}
+.reset-btn{font-size:12px;color:#c3bdd8;text-decoration:underline;margin-top:14px}
+
+/* ---------- 庆祝 ---------- */
+.celebrate{position:fixed;inset:0;z-index:100;background:rgba(90,80,130,.4);display:none;align-items:center;justify-content:center}
+.celebrate.show{display:flex}
+.celebrate-box{background:#fff;border-radius:26px;padding:30px 36px;text-align:center;animation:pop .3s ease}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.celebrate-emoji{font-size:52px}
+.celebrate-text{font-size:17px;font-weight:700;color:#6d63a8;margin:12px 0 18px}
+
+/* 大屏适配：侧边栏常驻 */
+@media(min-width:820px){
+  .sidebar{transform:translateX(0)}
+  .mask{display:none}
+  .menu-btn{visibility:hidden}
+  .main{margin-left:236px;max-width:640px}
+  .topbar{left:236px}
+}
+
+</style>
+</head>
+<body>
+<!-- 顶部栏 -->
+<header class="topbar">
+  <button id="menuBtn" class="menu-btn" aria-label="菜单">☰</button>
+  <div class="topbar-title">
+    <span class="logo-emoji">🐯</span>
+    <span>虎宝的工作台</span>
+  </div>
+  <div id="topDate" class="topbar-date"></div>
+</header>
+
+<!-- 遮罩 -->
+<div id="mask" class="mask"></div>
+
+<!-- 左侧弹出侧边导航 -->
+<aside id="sidebar" class="sidebar">
+  <div class="side-head">
+    <div class="side-avatar">🐯</div>
+    <div>
+      <div class="side-name">虎宝小朋友</div>
+      <div id="sideDate" class="side-date"></div>
+    </div>
+  </div>
+  <nav class="side-nav" id="sideNav">
+    <button class="nav-item active" data-page="plan">
+      <span class="nav-icon zero-icon" data-form="beyond"></span>
+      <span class="nav-text">每日计划</span><span class="nav-badge" id="badge-plan"></span>
+    </button>
+    <button class="nav-item" data-page="chinese">
+      <span class="nav-icon zero-icon" data-form="zero"></span>
+      <span class="nav-text">语文</span><span class="nav-badge" id="badge-chinese"></span>
+    </button>
+    <button class="nav-item" data-page="math">
+      <span class="nav-icon zero-icon" data-form="corona"></span>
+      <span class="nav-text">数学</span><span class="nav-badge" id="badge-math"></span>
+    </button>
+    <button class="nav-item" data-page="english">
+      <span class="nav-icon zero-icon" data-form="luna"></span>
+      <span class="nav-text">英语</span><span class="nav-badge" id="badge-english"></span>
+    </button>
+    <button class="nav-item" data-page="games">
+      <span class="nav-icon zero-icon" data-form="shining"></span>
+      <span class="nav-text">趣味学习游戏</span><span class="nav-badge" id="badge-games"></span>
+    </button>
+    <button class="nav-item" data-page="checkin">
+      <span class="nav-icon zero-icon" data-form="ultimate"></span>
+      <span class="nav-text">打卡</span><span class="nav-badge" id="badge-checkin"></span>
+    </button>
+  </nav>
+  <div class="side-foot">🌈 每天进步一点点</div>
+</aside>
+
+<!-- 主体内容 -->
+<main class="main">
+  <section id="page-plan" class="page active"></section>
+  <section id="page-chinese" class="page"></section>
+  <section id="page-math" class="page"></section>
+  <section id="page-english" class="page"></section>
+  <section id="page-games" class="page"></section>
+  <section id="page-checkin" class="page"></section>
+</main>
+
+<!-- 庆祝弹层 -->
+<div id="celebrate" class="celebrate">
+  <div class="celebrate-box">
+    <div class="celebrate-emoji">🎉</div>
+    <div id="celebrateText" class="celebrate-text">太棒啦！</div>
+    <button class="btn btn-primary" onclick="hideCelebrate()">继续加油</button>
+  </div>
+</div>
+
+<script>
+/* ============ 虎宝的工作台 · 学习素材库（每日自动轮换） ============ */
+
+/* 古诗（每日1首） */
+const POEMS=[
+{t:"咏鹅",a:"骆宾王",l:["鹅，鹅，鹅，","曲项向天歌。","白毛浮绿水，","红掌拨清波。"]},
+{t:"静夜思",a:"李白",l:["床前明月光，","疑是地上霜。","举头望明月，","低头思故乡。"]},
+{t:"春晓",a:"孟浩然",l:["春眠不觉晓，","处处闻啼鸟。","夜来风雨声，","花落知多少。"]},
+{t:"悯农",a:"李绅",l:["锄禾日当午，","汗滴禾下土。","谁知盘中餐，","粒粒皆辛苦。"]},
+{t:"登鹳雀楼",a:"王之涣",l:["白日依山尽，","黄河入海流。","欲穷千里目，","更上一层楼。"]},
+{t:"江雪",a:"柳宗元",l:["千山鸟飞绝，","万径人踪灭。","孤舟蓑笠翁，","独钓寒江雪。"]},
+{t:"池上",a:"白居易",l:["小娃撑小艇，","偷采白莲回。","不解藏踪迹，","浮萍一道开。"]},
+{t:"小池",a:"杨万里",l:["泉眼无声惜细流，","树阴照水爱晴柔。","小荷才露尖尖角，","早有蜻蜓立上头。"]},
+{t:"咏柳",a:"贺知章",l:["碧玉妆成一树高，","万条垂下绿丝绦。","不知细叶谁裁出，","二月春风似剪刀。"]},
+{t:"村居",a:"高鼎",l:["草长莺飞二月天，","拂堤杨柳醉春烟。","儿童散学归来早，","忙趁东风放纸鸢。"]},
+{t:"所见",a:"袁枚",l:["牧童骑黄牛，","歌声振林樾。","意欲捕鸣蝉，","忽然闭口立。"]},
+{t:"画",a:"王维",l:["远看山有色，","近听水无声。","春去花还在，","人来鸟不惊。"]},
+{t:"草",a:"白居易",l:["离离原上草，","一岁一枯荣。","野火烧不尽，","春风吹又生。"]},
+{t:"绝句",a:"杜甫",l:["两个黄鹂鸣翠柳，","一行白鹭上青天。","窗含西岭千秋雪，","门泊东吴万里船。"]}];
+
+/* 成语故事（每日1个） */
+const IDIOMS=[
+{n:"守株待兔",s:"从前有个农夫，看见一只兔子撞在树桩上死了。他就天天守在树桩旁等兔子，再也不种田了。结果田荒了，兔子也没等到。小朋友，做事情要靠自己努力，不能光等运气哦！"},
+{n:"拔苗助长",s:"有个人嫌禾苗长得太慢，就把苗一棵棵往上拔。回家告诉家人苗长高了，儿子跑去一看，苗全枯死了。做事情要有耐心，不能着急哦！"},
+{n:"亡羊补牢",s:"牧民的羊圈破了个洞，狼叼走了一只羊。邻居劝他修补，他不听，第二天又丢了一只。他赶紧把洞补好，从此再也没丢过羊。发现错误及时改正，就不算晚！"},
+{n:"画蛇添足",s:"几个人比赛画蛇，先画完的人得意地给蛇添上了脚，结果别人画完说：蛇本来没有脚呀！他反而输了。做多余的事情，反而会坏事哦！"},
+{n:"井底之蛙",s:"一只青蛙住在井底，以为天空只有井口那么大。小鸟告诉它天空无边无际，它却不相信。我们要多看看外面的世界，不能眼界太小哦！"},
+{n:"狐假虎威",s:"狐狸被老虎抓住，骗老虎说自己是百兽之王。老虎跟在狐狸后面走，动物们看见老虎都吓跑了，老虎还以为大家真的怕狐狸呢！借别人的力量吓唬人，可不是真本事！"},
+{n:"刻舟求剑",s:"有人坐船时剑掉进江里，他在船边刻了个记号，说等船靠岸再从记号处下水找剑。可是船在动，剑不动，怎么能找到呢？要用变化的眼光看问题哦！"},
+{n:"掩耳盗铃",s:"小偷想偷大钟，怕钟声被人听见，就捂住自己的耳朵去砸钟。他以为自己听不见，别人也听不见，结果被抓住啦！自己骗自己，是没有用的！"},
+{n:"自相矛盾",s:"有人卖矛又卖盾，说他的盾什么都刺不破，又说他的矛什么都能刺破。有人问：用你的矛刺你的盾会怎样？他答不上来了。说话做事要前后一致哦！"},
+{n:"对牛弹琴",s:"音乐家对着牛弹了一首优美的曲子，牛只顾低头吃草。后来他弹出蚊子和小牛的叫声，牛才竖起耳朵听。说话要看对象，用别人听得懂的方式哦！"},
+{n:"叶公好龙",s:"叶公特别喜欢龙，家里到处画着龙。真龙听说后来看他，叶公却吓得逃跑了。原来他喜欢的是假龙呀！喜欢一样东西，要真心喜欢哦！"},
+{n:"愚公移山",s:"90岁的愚公家门口有两座大山，出门很不方便。他带着家人天天挖山，别人笑他傻，他说：我挖不完还有儿子孙子接着挖！天帝被感动了，派神仙把山搬走了。坚持就能成功！"},
+{n:"熟能生巧",s:"卖油翁把油从铜钱的小孔倒进葫芦，一滴都不洒。大家惊叹，他笑着说：没什么，只是练得多了，熟能生巧。任何本领只要多练习，就能越来越棒！"},
+{n:"盲人摸象",s:"几个盲人摸大象，摸到腿的说象像柱子，摸到耳朵的说像扇子，摸到尾巴的说像绳子。看事情要看全面，不能只看一部分哦！"}];
+
+/* 生字库（每日10个，带拼音） */
+const HANZI=[["天","tiān"],["地","dì"],["人","rén"],["大","dà"],["小","xiǎo"],["上","shàng"],["下","xià"],["山","shān"],["水","shuǐ"],["火","huǒ"],
+["木","mù"],["土","tǔ"],["日","rì"],["月","yuè"],["云","yún"],["雨","yǔ"],["风","fēng"],["花","huā"],["草","cǎo"],["鸟","niǎo"],
+["虫","chóng"],["鱼","yú"],["手","shǒu"],["口","kǒu"],["目","mù"],["耳","ěr"],["头","tóu"],["足","zú"],["爸","bà"],["妈","mā"],
+["我","wǒ"],["你","nǐ"],["他","tā"],["好","hǎo"],["学","xué"],["生","shēng"],["中","zhōng"],["国","guó"],["家","jiā"],["门","mén"],
+["开","kāi"],["关","guān"],["来","lái"],["去","qù"],["坐","zuò"],["站","zhàn"],["走","zǒu"],["跑","pǎo"],["飞","fēi"],["叫","jiào"],
+["吃","chī"],["喝","hē"],["看","kàn"],["听","tīng"],["说","shuō"],["读","dú"],["写","xiě"],["画","huà"],["唱","chàng"],["跳","tiào"],
+["白","bái"],["红","hóng"],["黄","huáng"],["蓝","lán"],["绿","lǜ"],["黑","hēi"],["多","duō"],["少","shǎo"],["长","cháng"],["短","duǎn"],
+["高","gāo"],["矮","ǎi"],["早","zǎo"],["晚","wǎn"],["春","chūn"],["夏","xià"],["秋","qiū"],["冬","dōng"],["东","dōng"],["西","xī"],
+["南","nán"],["北","běi"],["左","zuǒ"],["右","yòu"],["前","qián"],["后","hòu"],["里","lǐ"],["外","wài"],["车","chē"],["船","chuán"],
+["星","xīng"],["光","guāng"],["电","diàn"],["米","mǐ"],["瓜","guā"],["果","guǒ"],["树","shù"],["叶","yè"],["石","shí"],["田","tián"]];
+
+/* 拼音库（每日5个，含例字与拼读） */
+const PINYIN=[
+{p:"b",ex:"爸 bà",sp:"b－à→bà"},{p:"p",ex:"跑 pǎo",sp:"p－ǎo→pǎo"},{p:"m",ex:"妈 mā",sp:"m－ā→mā"},{p:"f",ex:"飞 fēi",sp:"f－ēi→fēi"},{p:"d",ex:"大 dà",sp:"d－à→dà"},
+{p:"t",ex:"天 tiān",sp:"t－iān→tiān"},{p:"n",ex:"鸟 niǎo",sp:"n－iǎo→niǎo"},{p:"l",ex:"来 lái",sp:"l－ái→lái"},{p:"g",ex:"高 gāo",sp:"g－āo→gāo"},{p:"k",ex:"开 kāi",sp:"k－āi→kāi"},
+{p:"h",ex:"花 huā",sp:"h－uā→huā"},{p:"j",ex:"家 jiā",sp:"j－iā→jiā"},{p:"q",ex:"去 qù",sp:"q－ù→qù"},{p:"x",ex:"小 xiǎo",sp:"x－iǎo→xiǎo"},{p:"zh",ex:"中 zhōng",sp:"zh－ōng→zhōng"},
+{p:"ch",ex:"吃 chī",sp:"ch－ī→chī"},{p:"sh",ex:"山 shān",sp:"sh－ān→shān"},{p:"r",ex:"人 rén",sp:"r－én→rén"},{p:"z",ex:"坐 zuò",sp:"z－uò→zuò"},{p:"c",ex:"草 cǎo",sp:"c－ǎo→cǎo"},
+{p:"s",ex:"三 sān",sp:"s－ān→sān"},{p:"y",ex:"月 yuè",sp:"y－uè→yuè"},{p:"w",ex:"我 wǒ",sp:"w－ǒ→wǒ"},{p:"a",ex:"啊 ā",sp:"单韵母 ā á ǎ à"},{p:"o",ex:"喔 ō",sp:"单韵母 ō ó ǒ ò"},
+{p:"e",ex:"鹅 é",sp:"单韵母 ē é ě è"},{p:"i",ex:"衣 yī",sp:"单韵母 ī í ǐ ì"},{p:"u",ex:"乌 wū",sp:"单韵母 ū ú ǔ ù"},{p:"ü",ex:"鱼 yú",sp:"单韵母 ǖ ǘ ǚ ǜ"},{p:"ai",ex:"爱 ài",sp:"a－i→ai"},
+{p:"ei",ex:"诶 ēi",sp:"e－i→ei"},{p:"ui",ex:"水 shuǐ",sp:"u－i→ui"},{p:"ao",ex:"袄 ǎo",sp:"a－o→ao"},{p:"ou",ex:"藕 ǒu",sp:"o－u→ou"},{p:"iu",ex:"牛 niú",sp:"i－u→iu"},
+{p:"ie",ex:"叶 yè",sp:"i－e→ie"},{p:"an",ex:"安 ān",sp:"a－n→an"},{p:"en",ex:"恩 ēn",sp:"e－n→en"},{p:"in",ex:"音 yīn",sp:"i－n→in"},{p:"ang",ex:"昂 áng",sp:"a－ng→ang"},
+{p:"eng",ex:"灯 dēng",sp:"e－ng→eng"},{p:"ing",ex:"鹰 yīng",sp:"i－ng→ing"},{p:"ong",ex:"虹 hóng",sp:"o－ng→ong"}];
+
+/* 绘本故事（每日1个） */
+const BOOKS=[
+{t:"小兔子找月亮",s:"小兔子看见水里有个月亮，想把它捞起来送给妈妈。它捞呀捞，月亮总是碎掉。猫头鹰告诉它：抬头看呀！小兔子抬起头，看见了又大又圆的月亮挂在天上。它开心地说：妈妈，月亮我送给你啦！"},
+{t:"小熊的蜂蜜",s:"小熊有一罐甜甜的蜂蜜，它舍不得吃。小鸟饿了，小熊分给它一口；小松鼠饿了，小熊又分一口。最后蜂蜜吃完了，可小熊却交到了好多朋友。分享让快乐变得更多！"},
+{t:"爱笑的云朵",s:"天上有朵爱笑的云，它一笑就变形状：一会儿变小狗，一会儿变棉花糖。小朋友们躺在草地上看它，笑得肚子疼。云朵说：把快乐带给别人，自己也会更快乐！"},
+{t:"小蜗牛去旅行",s:"小蜗牛想去山顶看风景，大家都笑它太慢。它不放弃，每天爬一点点。春天出发，秋天终于爬上山顶，看到了最美的枫叶。坚持的孩子最棒！"},
+{t:"彩虹桥",s:"雨停了，天上出现一座七彩的桥。小狐狸想：这是谁修的桥呀？太阳公公笑着说：这是阳光和小雨滴一起做的礼物，叫彩虹。红橙黄绿蓝靛紫，一共七种颜色！"},
+{t:"勇敢的小企鹅",s:"小企鹅第一次跳水，站在冰上发抖。妈妈说：别怕，妈妈在下面等你。小企鹅闭上眼睛，扑通一声跳进海里——原来游泳这么好玩！勇敢试一试，就会有惊喜。"},
+{t:"爱刷牙的小鳄鱼",s:"小鳄鱼每天早晚都认真刷牙，牙齿白白亮亮。糖果虫最怕它，说：这里没有蛀牙洞，我们搬家吧！小鳄鱼笑得露出大白牙。小朋友，你今天刷牙了吗？"},
+{t:"月亮船",s:"弯弯的月亮像小船。小星星们排着队上船，月亮船摇啊摇，把星星送回家。困了的小朋友闭上眼睛，也能坐上月亮船，去梦里旅行。晚安！"},
+{t:"小星星回家",s:"一颗小星星贪玩，天亮了还没回家。太阳公公把光芒调柔和，云朵姐姐搭起云梯，小星星顺着梯子爬回了天上。它说：谢谢大家，以后我一定早点回家！"},
+{t:"爱分享的小松鼠",s:"小松鼠捡了满满一篮松果。冬天，小伙伴们没吃的了，小松鼠把松果分给大家。春天来了，大家一起帮小松鼠种松树，长出了一整片松树林！"}];
+
+/* 英语主题（每日1个主题：单词+句子） */
+const ENGLISH=[
+{th:"Animals 动物",w:[["cat","小猫","🐱"],["dog","小狗","🐶"],["duck","鸭子","🦆"],["fish","小鱼","🐟"],["bird","小鸟","🐦"],["rabbit","兔子","🐰"]],s:[["I have a cat.","我有一只小猫。"],["The dog is cute.","小狗真可爱。"]]},
+{th:"Colors 颜色",w:[["red","红色","🔴"],["blue","蓝色","🔵"],["yellow","黄色","🟡"],["green","绿色","🟢"],["pink","粉色","🌸"],["purple","紫色","🟣"]],s:[["I like blue.","我喜欢蓝色。"],["It is red.","它是红色的。"]]},
+{th:"Fruits 水果",w:[["apple","苹果","🍎"],["banana","香蕉","🍌"],["orange","橙子","🍊"],["grape","葡萄","🍇"],["peach","桃子","🍑"],["watermelon","西瓜","🍉"]],s:[["I like apples.","我喜欢苹果。"],["The banana is yellow.","香蕉是黄色的。"]]},
+{th:"Family 家人",w:[["dad","爸爸","👨"],["mom","妈妈","👩"],["grandpa","爷爷","👴"],["grandma","奶奶","👵"],["baby","宝宝","👶"],["family","家庭","👨‍👩‍👧"]],s:[["I love my mom.","我爱我的妈妈。"],["This is my dad.","这是我的爸爸。"]]},
+{th:"Body 身体",w:[["eye","眼睛","👁️"],["ear","耳朵","👂"],["nose","鼻子","👃"],["mouth","嘴巴","👄"],["hand","手","✋"],["foot","脚","🦶"]],s:[["Touch your nose.","摸摸你的鼻子。"],["Clap your hands.","拍拍你的手。"]]},
+{th:"Numbers 数字",w:[["one","一","1️⃣"],["two","二","2️⃣"],["three","三","3️⃣"],["four","四","4️⃣"],["five","五","5️⃣"],["six","六","6️⃣"]],s:[["I am five.","我五岁了。"],["One, two, three, go!","一二三，出发！"]]},
+{th:"Food 食物",w:[["milk","牛奶","🥛"],["egg","鸡蛋","🥚"],["bread","面包","🍞"],["rice","米饭","🍚"],["cake","蛋糕","🍰"],["noodles","面条","🍜"]],s:[["I like milk.","我喜欢牛奶。"],["Yummy, yummy cake!","蛋糕真好吃！"]]},
+{th:"Weather 天气",w:[["sun","太阳","☀️"],["rain","下雨","🌧️"],["snow","下雪","❄️"],["wind","风","🌬️"],["cloud","云","☁️"],["rainbow","彩虹","🌈"]],s:[["It is sunny.","今天是晴天。"],["I see a rainbow.","我看见彩虹啦。"]]},
+{th:"School 学校",w:[["book","书","📖"],["pen","笔","🖊️"],["bag","书包","🎒"],["desk","桌子","🪑"],["teacher","老师","🧑‍🏫"],["friend","朋友","🤝"]],s:[["Open your book.","打开你的书。"],["She is my friend.","她是我的朋友。"]]},
+{th:"Toys 玩具",w:[["ball","球","⚽"],["doll","娃娃","🪆"],["car","小汽车","🚗"],["kite","风筝","🪁"],["robot","机器人","🤖"],["blocks","积木","🧱"]],s:[["Let's play ball.","我们一起玩球吧。"],["I have a robot.","我有一个机器人。"]]}];
+
+/* 英文儿歌推荐（磨耳朵，每日2首） */
+const SONGS=["Twinkle Twinkle Little Star","Baby Shark","Old MacDonald Had a Farm","Head Shoulders Knees and Toes","The Wheels on the Bus","Bingo","Five Little Ducks","If You're Happy","Rain Rain Go Away","ABC Song","Ten Little Fingers","Walking Walking"];
+
+/* 英文动画绘本推荐（每日1个） */
+const EN_BOOKS=["Brown Bear, Brown Bear, What Do You See?","The Very Hungry Caterpillar","Dear Zoo","Goodnight Moon","Pete the Cat: I Love My White Shoes","From Head to Toe","Maisy Mouse","Peppa Pig","Where Is Spot?","Press Here"];
+
+/* 数学素材 */
+const SHAPES=[["圆形","⭕"],["三角形","🔺"],["正方形","🟦"],["长方形","▭"],["五角星","⭐"],["爱心","❤️"],["椭圆形","🥚"],["菱形","🔷"]];
+const POSITIONS=["上","下","左","右","里","外","前","后"];
+const COUNT_EMOJIS=["🍎","🌟","🐤","🎈","🍓","🐟","🌸","🚗","🍭","🐞"];
+
+
+/* ============ 虎宝的工作台 · 核心逻辑 ============ */
+
+/* ---------- 日期与每日种子 ---------- */
+const now=new Date();
+const pad=n=>String(n).padStart(2,"0");
+const TODAY=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+const DAY_IDX=Math.floor(now.getTime()/86400000+now.getTimezoneOffset()/1440*-0+0)% 100000;
+const WEEK=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"][now.getDay()];
+function pick(arr,offset=0){return arr[(DAY_IDX+offset)%arr.length];}
+function pickN(arr,n,step=1){const out=[];for(let i=0;i<n;i++)out.push(arr[(DAY_IDX*n*step+i)%arr.length]);return out;}
+function rng(seed){let s=seed%2147483647;if(s<=0)s+=2147483646;return()=>((s=s*16807%2147483647)-1)/2147483646;}
+const rand=rng(DAY_IDX+7);
+
+/* ---------- 本地存储 ---------- */
+const KEY="hubao_workbench_v1";
+let DB=JSON.parse(localStorage.getItem(KEY)||"null")||{custom:{},checks:{},dels:{},pri:{},checkins:{}};
+function save(){localStorage.setItem(KEY,JSON.stringify(DB));}
+function dayObj(root){if(!DB[root][TODAY])DB[root][TODAY]={};return DB[root][TODAY];}
+function delList(){if(!DB.dels[TODAY])DB.dels[TODAY]=[];return DB.dels[TODAY];}
+
+/* ---------- 语音朗读 (TTS) ---------- */
+let voices=[];
+function loadVoices(){voices=speechSynthesis.getVoices();}
+loadVoices();if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=loadVoices;
+function speak(text,lang="zh-CN",btn){
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang=lang;u.rate=lang.startsWith("en")?0.85:0.9;u.pitch=1.1;
+    const v=voices.find(v=>v.lang.replace("_","-").startsWith(lang))||voices.find(v=>v.lang.startsWith(lang.slice(0,2)));
+    if(v)u.voice=v;
+    if(btn){btn.classList.add("playing");u.onend=()=>btn.classList.remove("playing");u.onerror=()=>btn.classList.remove("playing");}
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+/* 供 HTML 内联调用 */
+function spk(el,text,lang){speak(text,lang||"zh-CN",el);}
+function spkBtn(text,lang){const t=text.replace(/'/g,"\\'");return `<button class="spk" onclick="spk(this,'${t}','${lang||"zh-CN"}')">🔊</button>`;}
+
+/* ---------- 今日学习素材 ---------- */
+const M={
+  poem:pick(POEMS), idiom:pick(IDIOMS),
+  hanzi:pickN(HANZI,10), pinyin:pickN(PINYIN,5),
+  book:pick(BOOKS), en:pick(ENGLISH),
+  songs:pickN(SONGS,2,3), enBook:pick(EN_BOOKS),
+  letters:[String.fromCharCode(65+DAY_IDX%26),String.fromCharCode(65+(DAY_IDX+1)%26)]
+};
+
+/* ---------- 每日默认任务 ---------- */
+const SUBJECTS={chinese:"语文",math:"数学",english:"英语",games:"游戏",plan:"计划"};
+const DEFAULT_TASKS={
+  chinese:[
+    {id:"cn1",text:`背诵古诗《${M.poem.t}》`},{id:"cn2",text:`学习成语故事「${M.idiom.n}」`},
+    {id:"cn3",text:"认识今日10个生字"},{id:"cn4",text:"学习5个拼音+拼读练习"},{id:"cn5",text:`阅读绘本《${M.book.t}》`}],
+  math:[
+    {id:"ma1",text:"数字认读与书写（5分钟）"},{id:"ma2",text:"数感小游戏（5分钟）"},
+    {id:"ma3",text:"图形与方位认知（5分钟）"},{id:"ma4",text:"生活数学应用（5分钟）"}],
+  english:[
+    {id:"en1",text:"英文磨耳朵听力（5分钟）"},{id:"en2",text:`单词跟读：${M.en.th}（5分钟）`},
+    {id:"en3",text:"日常口语短句（5分钟）"},{id:"en4",text:`英文绘本《${M.enBook}》（5分钟）`},
+    {id:"en5",text:`字母认知：${M.letters.join("、")}（选学）`},{id:"en6",text:"趣味互动小游戏（5分钟）"}],
+  games:[
+    {id:"gm1",text:"拼音汉字对对碰 通关1次"},{id:"gm2",text:"英语抓大鹅 得10分"}]
+};
+
+/* ---------- 任务引擎 ---------- */
+function getTasks(subj){
+  const dels=delList();
+  const defs=(DEFAULT_TASKS[subj]||[]).filter(t=>!dels.includes(t.id)).map(t=>({...t,subj,def:true}));
+  const cus=(DB.custom[subj]||[]).filter(t=>!dels.includes(t.id)).map(t=>({...t,subj,def:false}));
+  return defs.concat(cus);
+}
+function allTasks(){return["chinese","math","english","games","plan"].flatMap(getTasks);}
+function isDone(id){return !!dayObj("checks")[id];}
+function toggleTask(id){const c=dayObj("checks");c[id]=!c[id];if(!c[id])delete c[id];save();refresh();
+  const all=allTasks();if(all.length&&all.every(t=>isDone(t.id)))showCelebrate("今天的任务全部完成啦！\n快去打卡页面盖章吧！🎖️");}
+function togglePri(id){const p=dayObj("pri");p[id]=!p[id];if(!p[id])delete p[id];save();refresh();}
+function delTask(id){delList().push(id);save();refresh();}
+function addTask(subj,inputId){
+  const inp=document.getElementById(inputId);const v=inp.value.trim();if(!v)return;
+  if(!DB.custom[subj])DB.custom[subj]=[];
+  DB.custom[subj].push({id:"c"+Date.now(),text:v});inp.value="";save();refresh();
+}
+function stats(list){const d=list.filter(t=>isDone(t.id)).length;return{d,t:list.length,p:list.length?Math.round(d/list.length*100):0};}
+
+/* ---------- 任务清单渲染 ---------- */
+function taskListHTML(list,showTag){
+  if(!list.length)return `<div class="empty-tip">还没有任务，快添加一个吧 ✨</div>`;
+  const sorted=[...list].sort((a,b)=>(dayObj("pri")[b.id]?1:0)-(dayObj("pri")[a.id]?1:0));
+  return `<div class="task-list">`+sorted.map(t=>{
+    const done=isDone(t.id),pri=dayObj("pri")[t.id];
+    return `<div class="task-item ${done?"done":""}">
+      <button class="task-check" onclick="toggleTask('${t.id}')">${done?"✔":""}</button>
+      <span class="task-text">${t.text}</span>
+      ${showTag?`<span class="task-tag tag-${t.subj}">${SUBJECTS[t.subj]}</span>`:""}
+      <button class="task-pri ${pri?"on":""}" onclick="togglePri('${t.id}')" title="优先级">⭐</button>
+      <button class="task-del" onclick="delTask('${t.id}')">✖</button>
+    </div>`;}).join("")+`</div>`;
+}
+function addBoxHTML(subj){
+  return `<div class="task-add">
+    <input id="add-${subj}" placeholder="输入新任务，例如：练习写名字" onkeydown="if(event.key==='Enter')addTask('${subj}','add-${subj}')">
+    <button onclick="addTask('${subj}','add-${subj}')">＋添加</button></div>`;
+}
+function heroHTML(cls,emoji,title,sub,st){
+  return `<div class="page-hero ${cls}"><div class="hero-deco">${emoji}</div>
+    <h2>${title}</h2><div class="hero-sub">${sub}</div>
+    <div class="progress-wrap"><div class="progress-label">今日已完成 ${st.d}/${st.t} 项 · 完成率 ${st.p}%</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${st.p}%"></div></div></div></div>`;
+}
+function links(kw){
+  const k=encodeURIComponent(kw);
+  return `<div class="link-row">
+    <a class="link-btn link-bili" href="https://search.bilibili.com/all?keyword=${k}" target="_blank">📺 B站</a>
+    <a class="link-btn link-douyin" href="https://www.douyin.com/search/${k}" target="_blank">🎵 抖音</a>
+    <a class="link-btn link-web" href="https://www.baidu.com/s?wd=${k}" target="_blank">🔍 网页</a></div>`;
+}
+
+/* ---------- 每日计划页 ---------- */
+function renderPlan(){
+  const list=allTasks(),st=stats(list);
+  document.getElementById("page-plan").innerHTML=
+    heroHTML("hero-blue","📋",`<span class="zero-icon" data-form="beyond"></span> 每日计划`,`${TODAY} ${WEEK} · 汇总全部板块待办`,st)+
+    `<div class="card"><div class="card-title"><span class="t-emoji">✏️</span>新增计划任务</div>${addBoxHTML("plan")}
+    <div class="card-body" style="font-size:12px;color:#9a94b3">⭐ 点星星标记优先任务（自动置顶）· ✔ 打勾完成 · ✖ 删除</div></div>
+    <div class="card"><div class="card-title"><span class="t-emoji">🗒️</span>今日全部任务</div>${taskListHTML(list,true)}</div>`;
+  paintIcons();
+}
+
+/* ---------- 打卡页 ---------- */
+function doCheckin(){
+  const list=allTasks(),st=stats(list);
+  DB.checkins[TODAY]={done:st.d,total:st.t,time:`${pad(now.getHours())}:${pad(now.getMinutes())}`};
+  save();refresh();showCelebrate(`打卡成功！🎖️\n今天完成了 ${st.d}/${st.t} 项任务\n虎宝真棒，明天继续加油！`);
+}
+function resetAll(){
+  if(confirm("确定要清空全部学习记录吗？此操作不能恢复哦！")){localStorage.removeItem(KEY);location.reload();}
+}
+function calendarHTML(){
+  const y=now.getFullYear(),m=now.getMonth();
+  const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+  let h=["日","一","二","三","四","五","六"].map(d=>`<div class="cal-head">${d}</div>`).join("");
+  for(let i=0;i<first;i++)h+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${y}-${pad(m+1)}-${pad(d)}`;
+    const cls=(DB.checkins[ds]?"stamped":"")+(ds===TODAY?" today":"");
+    h+=`<div class="cal-day ${cls}">${DB.checkins[ds]?"🌟":d}</div>`;
+  }
+  return `<div class="cal-grid">${h}</div>`;
+}
+function renderCheckin(){
+  const list=allTasks(),st=stats(list);
+  const total=Object.keys(DB.checkins).length;
+  let streak=0;const d=new Date(now);
+  while(true){const ds=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    if(DB.checkins[ds]){streak++;d.setDate(d.getDate()-1);}
+    else{if(ds===TODAY){d.setDate(d.getDate()-1);continue;}break;}}
+  const done=DB.checkins[TODAY];
+  document.getElementById("page-checkin").innerHTML=
+    heroHTML("hero-yellow","🎖️",`<span class="zero-icon" data-form="ultimate"></span> 每日打卡`,`${TODAY} ${WEEK} · 坚持就是胜利`,st)+
+    `<div class="checkin-stats">
+      <div class="stat-box"><div class="stat-num">${st.d}</div><div class="stat-label">今日完成任务</div></div>
+      <div class="stat-box"><div class="stat-num">${total}</div><div class="stat-label">累计打卡天数</div></div>
+      <div class="stat-box"><div class="stat-num">${streak}</div><div class="stat-label">连续打卡天数</div></div></div>
+    <div class="card checkin-hero">
+      <div class="checkin-big">${done?"🌟":"🐯"}</div>
+      <div style="font-weight:700;color:#6d63a8;margin:10px 0 4px">${done?`今天已打卡（${done.time}）`:st.d===st.t&&st.t>0?"全部任务完成，快打卡吧！":`还差 ${st.t-st.d} 项任务就能完美打卡啦`}</div>
+      <div style="font-size:12px;color:#9a94b3;margin-bottom:16px">${done?"明天也要来哦！":"完成所有任务后打卡，收获今日之星 🌟"}</div>
+      <button class="btn ${st.d===st.t&&st.t>0?"btn-pink":"btn-ghost"}" ${done?"disabled style='opacity:.5'":""} onclick="doCheckin()">${done?"✔ 已打卡":"🎖️ 立即打卡"}</button>
+    </div>
+    <div class="card"><div class="card-title"><span class="t-emoji">📅</span>本月打卡日历</div>${calendarHTML()}
+      <div class="center"><button class="reset-btn" onclick="resetAll()">重置全部记录</button></div></div>`;
+  paintIcons();
+}
+
+/* ---------- 赛罗奥特曼形态图标 (SVG) ---------- */
+const ZERO_FORMS={
+  zero:["#c9d6e8","#e05a6d","#4a86c8"], corona:["#e8c9c9","#e0755a","#e8a03c"],
+  luna:["#d5cdf0","#9c86d8","#5a7de0"], shining:["#f0eee2","#d4c26a","#8fb8e8"],
+  beyond:["#c9dbe8","#5a9de0","#8d76cc"], ultimate:["#e8e2c9","#d4a83c","#e05a6d"]};
+function zeroSVG(f){
+  const[c1,c2,c3]=ZERO_FORMS[f]||ZERO_FORMS.zero;
+  return `<svg viewBox="0 0 48 48">
+  <ellipse cx="24" cy="26" rx="15" ry="17" fill="${c1}"/>
+  <path d="M9 26 Q6 12 16 16 L20 22 Z" fill="${c3}"/>
+  <path d="M39 26 Q42 12 32 16 L28 22 Z" fill="${c3}"/>
+  <path d="M24 8 L27 18 L21 18 Z" fill="${c2}"/>
+  <circle cx="24" cy="12" r="2.6" fill="${c2}"/>
+  <path d="M14 24 Q24 18 34 24 L34 30 Q24 25 14 30 Z" fill="${c2}" opacity=".85"/>
+  <ellipse cx="18.5" cy="27" rx="4.2" ry="5" fill="#ffe98a" stroke="#f5c542"/>
+  <ellipse cx="29.5" cy="27" rx="4.2" ry="5" fill="#ffe98a" stroke="#f5c542"/>
+  <ellipse cx="24" cy="38" rx="4" ry="2.2" fill="${c2}"/>
+  </svg>`;
+}
+function paintIcons(){document.querySelectorAll(".zero-icon").forEach(el=>{if(!el.innerHTML)el.innerHTML=zeroSVG(el.dataset.form);el.classList.add("zero-icon");el.style.cssText+="width:30px;height:30px;display:inline-flex;vertical-align:middle";});}
+
+/* ---------- 庆祝 ---------- */
+function showCelebrate(text){document.getElementById("celebrateText").innerText=text;document.getElementById("celebrate").classList.add("show");speak(text.replace(/\n/g,"，"));}
+function hideCelebrate(){document.getElementById("celebrate").classList.remove("show");}
+
+/* ---------- 导航与刷新 ---------- */
+let CURRENT="plan";
+function switchPage(page){
+  CURRENT=page;
+  document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+page));
+  closeSide();refresh();window.scrollTo({top:0});
+}
+function refresh(){
+  ({plan:renderPlan,chinese:renderChinese,math:renderMath,english:renderEnglish,games:renderGames,checkin:renderCheckin})[CURRENT]();
+  /* 侧边栏角标：各板块剩余任务数 */
+  ["plan","chinese","math","english","games"].forEach(s=>{
+    const list=s==="plan"?allTasks():getTasks(s);
+    const left=list.filter(t=>!isDone(t.id)).length;
+    document.getElementById("badge-"+s).innerText=left||"";
+  });
+  document.getElementById("badge-checkin").innerText=DB.checkins[TODAY]?"✔":"";
+}
+function openSide(){document.getElementById("sidebar").classList.add("open");document.getElementById("mask").classList.add("show");}
+function closeSide(){document.getElementById("sidebar").classList.remove("open");document.getElementById("mask").classList.remove("show");}
+
+/* ---------- 初始化 ---------- */
+document.getElementById("menuBtn").onclick=openSide;
+document.getElementById("mask").onclick=closeSide;
+document.querySelectorAll(".nav-item").forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
+document.getElementById("topDate").innerHTML=`${now.getMonth()+1}月${now.getDate()}日<br>${WEEK}`;
+document.getElementById("sideDate").innerText=`${TODAY} ${WEEK}`;
+document.querySelectorAll("#sideNav .zero-icon").forEach(el=>el.innerHTML=zeroSVG(el.dataset.form));
+window.addEventListener("load",()=>{refresh();});
+
+
+/* ============ 虎宝的工作台 · 语文/数学/英语板块 ============ */
+
+/* ---------- 语文板块 ---------- */
+function renderChinese(){
+  const st=stats(getTasks("chinese"));
+  const p=M.poem,poemText=`${p.t}，${p.a}。${p.l.join("")}`;
+  const hz=M.hanzi,py=M.pinyin;
+  /* 拼音习题：给生字选拼音 */
+  const qi=Math.floor(rand()*hz.length);
+  const q=hz[qi];
+  const opts=[q[1]];
+  while(opts.length<3){const o=hz[Math.floor(rand()*hz.length)][1];if(!opts.includes(o))opts.push(o);}
+  opts.sort(()=>rand()-0.5);
+  document.getElementById("page-chinese").innerHTML=
+    heroHTML("hero-pink","📚",`<span class="zero-icon" data-form="zero"></span> 语文小课堂`,`${TODAY} ${WEEK} · 每日30分钟 · 内容每日自动更新`,st)+
+    `<div class="card"><div class="card-title"><span class="t-emoji">✅</span>今日语文任务</div>${addBoxHTML("chinese")}${taskListHTML(getTasks("chinese"))}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">🖋️</span>每日古诗 <span class="t-time">背诵</span>${spkBtn(poemText)}</div>
+      <div class="poem-box"><div class="poem-title">${p.t}</div><div class="poem-author">〔唐/宋〕 ${p.a}</div>
+      ${p.l.map(x=>`<div class="poem-line">${x}</div>`).join("")}</div>${links(p.t+" 古诗 儿童跟读")}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">🦊</span>成语故事 <span class="t-time">听故事</span>${spkBtn(M.idiom.n+"。"+M.idiom.s)}</div>
+      <div class="card-body"><b style="color:#e295b4;font-size:17px">「${M.idiom.n}」</b><div class="story-text" style="margin-top:8px">${M.idiom.s}</div></div>
+      ${links(M.idiom.n+" 成语故事 动画")}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">🀄</span>今日10个生字 <span class="t-time">认一认</span>${spkBtn(hz.map(h=>h[0]).join("，"))}</div>
+      <div class="hanzi-grid">${hz.map(h=>`<div class="hanzi-cell" onclick="spk(this,'${h[0]}')"><div class="hanzi-py">${h[1]}</div><div class="hanzi-ch">${h[0]}</div></div>`).join("")}</div>
+      <div style="font-size:11px;color:#9a94b3;margin-top:8px;text-align:center">👆 点一点汉字，就会读给你听哦</div>${links("幼儿识字 "+hz[0][0]+hz[1][0]+hz[2][0])}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">🔤</span>今日5个拼音 <span class="t-time">拼一拼</span>${spkBtn(py.map(x=>x.ex).join("，"))}</div>
+      <div class="pinyin-row">${py.map(x=>`<div class="pinyin-chip" onclick="spk(this,'${x.ex}')">${x.p} <span style="font-weight:400;font-size:12px">${x.ex}</span> 🔊</div>`).join("")}</div>
+      <div class="card-title" style="margin-top:14px"><span class="t-emoji">🗣️</span>拼读练习</div>
+      ${py.map(x=>`<div class="spell-line"><span>${x.sp}</span>${spkBtn(x.ex)}</div>`).join("")}
+      <div class="quiz-box"><div class="quiz-q">配套习题：<span class="big">${q[0]}</span> 的拼音是？${spkBtn(q[0])}</div>
+      <div class="quiz-opts">${opts.map(o=>`<button class="quiz-opt" onclick="quizPick(this,'${o}','${q[1]}','cnq')">${o}</button>`).join("")}</div>
+      <div class="quiz-feedback" id="fb-cnq"></div></div>${links("幼儿拼音启蒙 "+py[0].p)}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">📖</span>今日绘本故事 <span class="t-time">读一读</span>${spkBtn(M.book.t+"。"+M.book.s)}</div>
+      <div class="card-body"><b style="color:#8d76cc;font-size:16px">《${M.book.t}》</b>
+      <div class="story-text" style="margin-top:8px">${M.book.s}</div></div>${links(M.book.t+" 儿童绘本故事")}</div>`;
+  paintIcons();
+}
+
+/* ---------- 习题通用判定 ---------- */
+function quizPick(btn,val,ans,fbId){
+  const fb=document.getElementById("fb-"+fbId);
+  if(val===ans){btn.classList.add("right");fb.innerHTML="🎉 答对啦，真棒！";fb.style.color="#2c7d5c";speak("答对啦，真棒！");}
+  else{btn.classList.add("wrong");fb.innerHTML="再想一想哦～";fb.style.color="#e295b4";speak("再想一想哦");}
+}
+
+/* ---------- 数学板块 ---------- */
+function renderMath(){
+  const st=stats(getTasks("math"));
+  /* 1 数字认读书写 */
+  const nums=[];for(let i=0;i<6;i++)nums.push(Math.floor(rand()*21));
+  const colors=["#aecff5","#f6c9d8","#cfc3ef","#c6e8dd","#f9e1a8","#f5b8a8"];
+  /* 2 数感：点数 */
+  const cnt=2+Math.floor(rand()*8);
+  const cEmoji=COUNT_EMOJIS[Math.floor(rand()*COUNT_EMOJIS.length)];
+  const cOpts=[cnt,cnt+1,Math.max(1,cnt-1)].sort(()=>rand()-0.5);
+  /* 比较多少 */
+  const a=1+Math.floor(rand()*9),b=1+Math.floor(rand()*9);
+  const cmpAns=a>b?"左边多":a<b?"右边多":"一样多";
+  /* 3 图形 */
+  const sh=SHAPES[Math.floor(rand()*SHAPES.length)];
+  const shOpts=[sh[0]];
+  while(shOpts.length<3){const o=SHAPES[Math.floor(rand()*SHAPES.length)][0];if(!shOpts.includes(o))shOpts.push(o);}
+  shOpts.sort(()=>rand()-0.5);
+  const pos=POSITIONS[Math.floor(rand()*POSITIONS.length)];
+  /* 4 生活数学：钟表 */
+  const hour=1+Math.floor(rand()*12);
+  const hOpts=[hour,hour%12+1,(hour+10)%12+1].sort(()=>rand()-0.5);
+  document.getElementById("page-math").innerHTML=
+    heroHTML("hero-blue","🔢",`<span class="zero-icon" data-form="corona"></span> 数学小天地`,`${TODAY} ${WEEK} · 每日20分钟 · 内容每日自动更新`,st)+
+    `<div class="card"><div class="card-title"><span class="t-emoji">✅</span>今日数学任务</div>${addBoxHTML("math")}${taskListHTML(getTasks("math"))}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">✍️</span>数字认读与书写 <span class="t-time">5分钟</span>${spkBtn("今天来认一认这些数字："+nums.join("，"))}</div>
+      <div class="card-body" style="font-size:12px;color:#9a94b3;margin-bottom:8px">读一读下面的数字，再拿起笔在纸上写一写（0-20规范书写）</div>
+      <div class="num-grid">${nums.map((n,i)=>`<div class="num-ball" style="background:${colors[i%6]}" onclick="spk(this,'${n}')">${n}</div>`).join("")}</div>
+      ${links("幼儿数字书写 0到20")}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">🎲</span>数感小游戏 <span class="t-time">5分钟</span>${spkBtn("数一数，下面有几个"+cEmoji+"？")}</div>
+      <div class="quiz-box"><div class="quiz-q">数一数，有几个？<div style="font-size:26px;letter-spacing:4px;margin-top:6px">${cEmoji.repeat(cnt)}</div></div>
+      <div class="quiz-opts">${cOpts.map(o=>`<button class="quiz-opt" onclick="quizPick(this,'${o}','${cnt}','maq1')">${o}</button>`).join("")}</div>
+      <div class="quiz-feedback" id="fb-maq1"></div></div>
+      <div class="quiz-box"><div class="quiz-q">比一比，哪边多？${spkBtn("比一比，哪边多？")}<div style="font-size:22px;margin-top:6px">${"🍎".repeat(a)}　vs　${"🍐".repeat(b)}</div></div>
+      <div class="quiz-opts">${["左边多","右边多","一样多"].map(o=>`<button class="quiz-opt" style="font-size:13px" onclick="quizPick(this,'${o}','${cmpAns}','maq2')">${o}</button>`).join("")}</div>
+      <div class="quiz-feedback" id="fb-maq2"></div></div>${links("幼儿数感游戏 点数")}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">🔷</span>图形与方位认知 <span class="t-time">5分钟</span>${spkBtn("认识图形和方位")}</div>
+      <div class="quiz-box"><div class="quiz-q">这是什么图形？<span class="big">${sh[1]}</span>${spkBtn("这是什么图形？")}</div>
+      <div class="quiz-opts">${shOpts.map(o=>`<button class="quiz-opt" style="font-size:13px" onclick="quizPick(this,'${o}','${sh[0]}','maq3')">${o}</button>`).join("")}</div>
+      <div class="quiz-feedback" id="fb-maq3"></div></div>
+      <div class="card-body" style="background:#fbfaff;border-radius:14px;padding:12px;margin-top:10px">
+      🧭 <b>方位小练习：</b>把你的小手放在头的「<b style="color:#4a86c8">${pos}</b>」面！${spkBtn("把你的小手放在头的"+pos+"面！")}</div>
+      ${links("幼儿认识图形 方位 上下左右")}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">🕐</span>生活数学应用 <span class="t-time">5分钟</span>${spkBtn("认一认钟表")}</div>
+      <div class="quiz-box"><div class="quiz-q">钟表上是几点？<span class="big">🕐</span> 时针指着 <b style="color:#e295b4;font-size:22px">${hour}</b>，分针指着 12${spkBtn("时针指着"+hour+"，分针指着12，现在是几点？")}</div>
+      <div class="quiz-opts">${hOpts.map(o=>`<button class="quiz-opt" style="font-size:13px" onclick="quizPick(this,'${o}点','${hour}点','maq4')">${o}点</button>`).join("")}</div>
+      <div class="quiz-feedback" id="fb-maq4"></div></div>
+      <div class="card-body" style="background:#fbfaff;border-radius:14px;padding:12px;margin-top:10px">
+      💰 <b>生活小任务：</b>找一找家里的1元硬币，比一比铅笔和筷子哪个长、书包和水杯哪个重${spkBtn("找一找家里的一元硬币，比一比铅笔和筷子哪个长")}</div>
+      ${links("幼儿认识钟表 钱币")}</div>`;
+  paintIcons();
+}
+
+/* ---------- 英语板块 ---------- */
+function renderEnglish(){
+  const st=stats(getTasks("english"));
+  const en=M.en;
+  document.getElementById("page-english").innerHTML=
+    heroHTML("hero-purple","🌈",`<span class="zero-icon" data-form="luna"></span> 英语小乐园`,`${TODAY} ${WEEK} · 今日主题：${en.th} · 每日自动更新`,st)+
+    `<div class="card"><div class="card-title"><span class="t-emoji">✅</span>今日英语任务</div>${addBoxHTML("english")}${taskListHTML(getTasks("english"))}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">🎧</span>英文磨耳朵听力 <span class="t-time">5分钟</span>${spkBtn(M.songs.join(". "),"en-US")}</div>
+      ${M.songs.map(s=>`<div class="sent-item"><div><div class="sent-en">🎵 ${s}</div><div class="sent-zh">经典英文儿歌 · 泛听磨耳朵</div></div>${spkBtn(s,"en-US")}</div>`).join("")}
+      ${links(M.songs[0]+" 英文儿歌")}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">🗂️</span>单词跟读认读 <span class="t-time">5分钟</span>${spkBtn(en.w.map(w=>w[0]).join(". "),"en-US")}</div>
+      <div class="card-body" style="font-size:12px;color:#9a94b3;margin-bottom:8px">今日主题：<b style="color:#8d76cc">${en.th}</b> · 点喇叭跟着读一读、再指一指</div>
+      <div class="word-grid">${en.w.map(w=>`<div class="word-card"><div class="word-emoji">${w[2]}</div><div class="word-en">${w[0]}</div><div class="word-zh">${w[1]}</div><button class="spk" onclick="spk(this,'${w[0]}','en-US')">🔊</button></div>`).join("")}</div>
+      ${links(en.th+" 幼儿英语单词")}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">💬</span>日常口语短句 <span class="t-time">5分钟</span>${spkBtn(en.s.map(x=>x[0]).join(" "),"en-US")}</div>
+      ${en.s.map(x=>`<div class="sent-item"><div><div class="sent-en">${x[0]}</div><div class="sent-zh">${x[1]}</div></div>${spkBtn(x[0],"en-US")}</div>`).join("")}
+      <div class="card-body" style="font-size:12px;color:#9a94b3;margin-top:8px">👄 听一遍 → 跟读一遍 → 自己大声说一遍</div>${links("幼儿英语日常口语")}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">📕</span>英文绘本观看 <span class="t-time">5分钟</span>${spkBtn(M.enBook,"en-US")}</div>
+      <div class="sent-item"><div><div class="sent-en">📖 ${M.enBook}</div><div class="sent-zh">今日推荐低幼英文绘本/动画</div></div>${spkBtn(M.enBook,"en-US")}</div>
+      ${links(M.enBook+" 英文绘本动画")}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">🅰️</span>字母认知游戏 <span class="t-time">选学</span>${spkBtn(M.letters.join(". "),"en-US")}</div>
+      <div class="num-grid">${M.letters.map((L,i)=>`<div class="num-ball" style="background:${i?"#cfc3ef":"#aecff5"};width:64px;height:64px;font-size:26px" onclick="spk(this,'${L}. ${L.toLowerCase()}','en-US')">${L}${L.toLowerCase()}</div>`).join("")}</div>
+      <div class="card-body" style="font-size:12px;color:#9a94b3;margin-top:8px;text-align:center">👆 今日字母，点一点听发音 · 26个字母每日轮换</div>${links("字母"+M.letters[0]+" 幼儿英语启蒙")}</div>`+
+
+    `<div class="card"><div class="card-title"><span class="t-emoji">🎮</span>趣味互动小游戏 <span class="t-time">5分钟</span>${spkBtn("Let's play a game!","en-US")}</div>
+      <div class="card-body">今日单词都认识了吗？去「趣味学习游戏」板块玩 <b style="color:#8d76cc">英语抓大鹅</b>，帮大鹅找到正确的单词吧！</div>
+      <div class="center" style="margin-top:10px"><button class="btn btn-primary" onclick="switchPage('games');switchGame('goose')">🦢 去玩抓大鹅</button></div></div>`;
+  paintIcons();
+}
+
+
+/* ============ 虎宝的工作台 · 趣味学习游戏 ============ */
+let GAME="match";
+function switchGame(g){GAME=g;renderGames();}
+
+function renderGames(){
+  const st=stats(getTasks("games"));
+  document.getElementById("page-games").innerHTML=
+    heroHTML("hero-mint","🎮",`<span class="zero-icon" data-form="shining"></span> 趣味学习游戏`,`${TODAY} ${WEEK} · 边玩边学更快乐`,st)+
+    `<div class="card"><div class="card-title"><span class="t-emoji">✅</span>今日游戏任务</div>${addBoxHTML("games")}${taskListHTML(getTasks("games"))}</div>`+
+    `<div class="game-tabs">
+      <button class="game-tab ${GAME==="match"?"active":""}" onclick="switchGame('match')">🀄 拼音对对碰</button>
+      <button class="game-tab ${GAME==="goose"?"active":""}" onclick="switchGame('goose')">🦢 英语抓大鹅</button></div>
+    <div class="card" id="gameArea"></div>`;
+  paintIcons();
+  if(GAME==="match")initMatch();else initGoose();
+}
+
+/* ---------- 游戏1：拼音汉字对对碰 ---------- */
+let mLevel=1,mFirst=null,mLock=false,mLeft=0,mPairs=[];
+function initMatch(){
+  mFirst=null;mLock=false;
+  const start=(DAY_IDX*10+(mLevel-1)*6)%HANZI.length;
+  mPairs=[];for(let i=0;i<6;i++)mPairs.push(HANZI[(start+i)%HANZI.length]);
+  mLeft=6;
+  let cards=[];
+  mPairs.forEach((p,i)=>{cards.push({v:p[0],k:i,type:"ch"});cards.push({v:p[1],k:i,type:"py"});});
+  cards.sort(()=>Math.random()-0.5);
+  document.getElementById("gameArea").innerHTML=
+    `<div class="game-info"><span>🚩 第 ${mLevel} 关</span><span>找到 <b id="mLeft">${mLeft}</b> 对拼音和汉字</span>
+     ${spkBtn("翻开卡片，把拼音和汉字配成一对吧！")}</div>
+     <div class="match-grid">${cards.map((c,i)=>`<button class="match-card" id="mc${i}" data-k="${c.k}" data-v="${c.v}" data-t="${c.type}" onclick="flipCard(${i})">${c.v}</button>`).join("")}</div>
+     <div class="center" style="margin-top:12px"><button class="btn btn-ghost" onclick="initMatch()">🔄 重新开始</button></div>`;
+}
+function flipCard(i){
+  if(mLock)return;
+  const el=document.getElementById("mc"+i);
+  if(el.classList.contains("flip")||el.classList.contains("matched"))return;
+  el.classList.add("flip");
+  speak(el.dataset.t==="ch"?el.dataset.v:mPairs[el.dataset.k][0]);
+  if(!mFirst){mFirst=el;return;}
+  const a=mFirst,b=el;mFirst=null;
+  if(a.dataset.k===b.dataset.k){
+    a.classList.add("matched");b.classList.add("matched");
+    mLeft--;document.getElementById("mLeft").innerText=mLeft;
+    if(mLeft===0){
+      setTimeout(()=>{
+        if(mLevel<3){mLevel++;showCelebrate(`第 ${mLevel-1} 关通关！🎉\n进入第 ${mLevel} 关！`);initMatch();}
+        else{mLevel=1;showCelebrate("三关全部通关！🏆\n虎宝是拼音小达人！");initMatch();}
+      },400);
+    }
+  }else{
+    mLock=true;
+    setTimeout(()=>{a.classList.remove("flip");b.classList.remove("flip");mLock=false;},700);
+  }
+}
+
+/* ---------- 游戏2：英语抓大鹅 ---------- */
+let gScore=0,gTarget=null,gTimer=null,gGeese=[];
+function initGoose(){
+  gScore=0;
+  document.getElementById("gameArea").innerHTML=
+    `<div class="game-info"><span>🏅 得分：<b id="gScore">0</b> / 10</span>
+     ${spkBtn("听单词，抓住背着正确图案的大鹅！")}</div>
+     <div class="goose-target" id="gTargetBox"></div>
+     <div class="goose-area" id="gooseArea"></div>
+     <div class="center" style="margin-top:12px"><button class="btn btn-ghost" onclick="initGoose()">🔄 重新开始</button></div>`;
+  nextGooseRound();
+}
+function nextGooseRound(){
+  if(gTimer)clearInterval(gTimer);
+  const area=document.getElementById("gooseArea");
+  if(!area)return;
+  area.innerHTML="";gGeese=[];
+  const words=M.en.w;
+  gTarget=words[Math.floor(Math.random()*words.length)];
+  document.getElementById("gTargetBox").innerHTML=
+    `抓住背着 <span style="font-size:20px;color:#e295b4">${gTarget[0]}</span> 的大鹅！
+     <button class="spk" onclick="spk(this,'${gTarget[0]}','en-US')">🔊</button>`;
+  speak(gTarget[0],"en-US");
+  /* 生成3只大鹅：1只正确 + 2只干扰 */
+  const pool=[gTarget];
+  while(pool.length<3){const w=words[Math.floor(Math.random()*words.length)];if(!pool.includes(w))pool.push(w);}
+  pool.sort(()=>Math.random()-0.5);
+  pool.forEach((w,i)=>{
+    const g=document.createElement("div");
+    g.className="goose";
+    g.innerHTML=`<div class="g-body">🦢</div><div class="g-item">${w[2]}</div>`;
+    g.style.left=(5+i*32)+"%";
+    g.style.top=(Math.random()*70)+"%";
+    g.dataset.dir=Math.random()>0.5?1:-1;
+    g.onclick=()=>catchGoose(w,g);
+    area.appendChild(g);gGeese.push(g);
+  });
+  gTimer=setInterval(()=>{
+    gGeese.forEach(g=>{
+      let t=parseFloat(g.style.top),d=parseFloat(g.dataset.dir);
+      t+=d*(1.5+Math.random()*2);
+      if(t>78){t=78;g.dataset.dir=-1;}if(t<2){t=2;g.dataset.dir=1;}
+      g.style.top=t+"%";
+    });
+  },120);
+}
+function catchGoose(w,el){
+  if(w===gTarget){
+    gScore++;
+    el.querySelector(".g-body").innerText="💥";
+    speak("Great! "+w[0],"en-US");
+    const s=document.getElementById("gScore");if(s)s.innerText=gScore;
+    setTimeout(()=>{
+      if(gScore>=10){clearInterval(gTimer);showCelebrate("抓到10只大鹅！🏆\n虎宝是单词小猎手！");initGoose();}
+      else nextGooseRound();
+    },500);
+  }else{
+    el.style.opacity=.4;
+    speak("Try again!","en-US");
+    setTimeout(()=>el.style.opacity=1,600);
+  }
+}
+
+</script>
+
+<script>
+if ('serviceWorker' in navigator) { window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+(function(){try{
+  if(window.matchMedia('(display-mode: standalone)').matches)return;
+  if(localStorage.getItem('hubao_pwa_tip'))return;
+  var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;left:12px;right:12px;bottom:14px;z-index:9999;background:linear-gradient(135deg,#aecff5,#cfc3ef);color:#2b3a67;padding:14px 16px;border-radius:18px;box-shadow:0 8px 24px rgba(120,140,200,.35);font-size:14px;line-height:1.6;';
+  t.innerHTML='📲 把它变成手机App：点右上角「⋮」→ <b>'+(ios?'分享 → 添加到主屏幕':'安装应用 / 添加到主屏幕')+'</b>，以后桌面一点就开，还能离线用～ <span style="float:right;cursor:pointer;font-weight:bold;" onclick="this.parentNode.remove();localStorage.setItem('hubao_pwa_tip',1);">✕</span>';
+  document.body.appendChild(t);
+  setTimeout(function(){localStorage.setItem('hubao_pwa_tip',1);},8000);
+}catch(e){}})();
+</script>
+
+</body>
+</html>
